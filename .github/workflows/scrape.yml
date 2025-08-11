@@ -36,7 +36,7 @@ jobs:
           echo "FETCH_MONTH=$CURRENT_MONTH" >> $GITHUB_ENV
 
       - name: Run scraper whole month
-        run: python src/scrape_month.py
+        run: python src/scrape_xsmn.py
         env:
           FETCH_MONTH: ${{ env.FETCH_MONTH }}
 
