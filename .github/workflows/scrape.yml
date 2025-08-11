@@ -1,44 +1,28 @@
-name: Scrape XSMN Daily
+name: Scrape XSMN Whole Month
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '35 11 * * *'  # 18:35 giờ Việt Nam (UTC+7 = UTC 11:35)
 
 jobs:
-  scrape:
+  scrape-month:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout repo
+      - name: Checkout repo main branch
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
-
-      - name: Create data directory
-        run: mkdir -p data
-
-      - name: Get current date Vietnam timezone
-        id: date
-        run: echo "FETCH_DATE=$(TZ='Asia/Ho_Chi_Minh' date +'%d-%m-%Y')" >> $GITHUB_ENV
+        run: pip install requests beautifulsoup4
 
       - name: Run scraper
         run: python src/scrape_xsmn.py
         env:
-          FETCH_DATE: ${{ env.FETCH_DATE }}
-
-      - name: Commit scraped data
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: 'Update XSMN data for ${{ env.FETCH_DATE }}'
-          branch: main
-          file_pattern: 'data/xsmn_*.json'
+          FETCH_MONTH: '08-2025'
