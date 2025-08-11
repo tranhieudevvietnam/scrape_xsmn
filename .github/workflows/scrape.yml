@@ -1,12 +1,12 @@
-name: Scrape XSMN Daily
+name: Scrape XSMN Whole Month
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '35 11 * * *'  # 18:35 giờ Việt Nam (UTC+7 = UTC 11:35)
+    - cron: '35 11 1 * *'  # 18:35 ngày mùng 1 hàng tháng (theo giờ VN)
 
 jobs:
-  scrape:
+  scrape-month:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,18 +27,20 @@ jobs:
       - name: Create data directory
         run: mkdir -p data
 
-      - name: Get current date Vietnam timezone
-        id: date
-        run: echo "FETCH_DATE=$(TZ='Asia/Ho_Chi_Minh' date +'%d-%m-%Y')" >> $GITHUB_ENV
+      - name: Set FETCH_MONTH environment variable
+        id: set_month
+        run: |
+          CURRENT_MONTH=$(TZ='Asia/Ho_Chi_Minh' date +'%m-%Y')
+          echo "FETCH_MONTH=$CURRENT_MONTH" >> $GITHUB_ENV
 
-      - name: Run scraper
-        run: python src/scrape_xsmn.py
+      - name: Run scraper whole month
+        run: python src/scrape_month.py
         env:
-          FETCH_DATE: ${{ env.FETCH_DATE }}
+          FETCH_MONTH: ${{ env.FETCH_MONTH }}
 
       - name: Commit scraped data
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'Update XSMN data for ${{ env.FETCH_DATE }}'
+          commit_message: 'Update XSMN data for month ${{ env.FETCH_MONTH }}'
           branch: main
           file_pattern: 'data/xsmn_*.json'
